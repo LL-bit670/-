@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C语言 第2章 数据的存储与运算 · 学习讲义</title>
+<style>
+  :root{
+    --bg:#F7F6F3; --card:#FFFFFF; --ink:#22201D; --ink2:#5A574F;
+    --line:#E2DFD8; --accent:#1D6E4E; --accent-bg:#EAF3EE;
+    --warn:#A8571B; --warn-bg:#FBF0E4; --code:#F2F1ED;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 20px 80px;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto}
+  header{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:22px 26px;margin-bottom:22px}
+  header h1{margin:0 0 6px;font-size:24px;font-weight:600;letter-spacing:.2px}
+  header .sub{color:var(--ink2);font-size:14px}
+  .meta{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;font-size:13px}
+  .meta span{background:var(--accent-bg);color:var(--accent);border-radius:20px;padding:3px 12px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:22px 26px;margin-bottom:18px}
+  h2{font-size:19px;font-weight:600;margin:0 0 4px;padding-bottom:12px;border-bottom:2px solid var(--accent-bg)}
+  h2 .num{color:var(--accent);margin-right:8px}
+  h3{font-size:16px;font-weight:600;margin:22px 0 8px}
+  h3:first-of-type{margin-top:16px}
+  p{margin:8px 0}
+  ul,ol{margin:8px 0;padding-left:24px}
+  li{margin:5px 0}
+  code{background:var(--code);border-radius:4px;padding:1px 6px;
+    font-family:Consolas,"Cascadia Mono",monospace;font-size:13.5px;color:#9B2C2C}
+  pre{background:#FBFBF9;border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:8px;padding:14px 16px;overflow-x:auto;margin:12px 0;
+    font-family:Consolas,"Cascadia Mono",monospace;font-size:13.5px;line-height:1.65;
+    color:#24292F;white-space:pre}
+  pre code{background:none;padding:0;color:inherit;font-size:inherit}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  th{background:#F4F3EF;font-weight:600}
+  td.n{font-family:Consolas,monospace}
+  .tip{background:var(--accent-bg);border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0;font-size:14px}
+  .warn{background:var(--warn-bg);border-left:3px solid var(--warn);
+    border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0;font-size:14px}
+  .tip b,.warn b{display:block;margin-bottom:4px}
+  details{background:#FAFAF8;border:1px solid var(--line);border-radius:8px;
+    padding:10px 16px;margin:10px 0}
+  details summary{cursor:pointer;font-weight:500;color:var(--accent);font-size:14px}
+  details[open] summary{margin-bottom:8px;border-bottom:1px dashed var(--line);padding-bottom:8px}
+  details p:first-of-type{margin-top:6px}
+  .ans{font-size:14px}
+  .q{margin:20px 0 4px;font-weight:600}
+  .q .idx{display:inline-block;background:var(--accent);color:#fff;border-radius:5px;
+    width:22px;height:22px;line-height:22px;text-align:center;font-size:13px;margin-right:8px}
+  .chk{list-style:none;padding-left:0}
+  .chk li{padding-left:28px;position:relative}
+  .chk li:before{content:"";position:absolute;left:0;top:8px;width:14px;height:14px;
+    border:1.5px solid #B8B4AA;border-radius:3px}
+  footer{text-align:center;color:#9A968D;font-size:13px;margin-top:30px}
+  @media print{body{background:#fff;padding:0}section,header{break-inside:avoid;border-color:#CCC}
+    details{display:block}details summary{display:none}details>*{display:block!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>C 语言 第2章 · 数据的存储与运算</h1>
+  <div class="sub">教材：谭浩强《C程序设计》第5版（清华大学出版社）· 零基础起步版</div>
+  <div class="meta">
+    <span>建议用时 45min 读 + 30min 练</span>
+    <span>今晚主线任务</span>
+    <span>2026-09-11</span>
+  </div>
+</header>
+
+<section>
+  <h2><span class="num">00</span>为什么第 2 章最关键</h2>
+  <p>第 1 章你只学会了「程序长什么样」，第 2 章开始回答一个更要命的问题：<b>数据在电脑里到底是怎么存的？</b></p>
+  <p>这一章看起来像在讲一堆名词（整型、实型、字符型），其实是在给你后面所有章节打地基：</p>
+  <ul>
+    <li>不懂「整型只有 4 字节」→ 第 5 章写循环时会遇到莫名其妙的溢出</li>
+    <li>不懂「float 存不准小数」→ 以后写判断语句会掉进 <code>0.1+0.2 != 0.3</code> 的坑</li>
+    <li>不懂「字符本质是整数」→ 学字符串、数组、指针时会完全懵</li>
+  </ul>
+  <div class="tip"><b>一句话抓住全章</b>C 语言里所有数据，最终都是内存里的一串 0 和 1。类型，只是你决定「用几位来解读这段 0/1」的方式。</div>
+</section>
+
+<section>
+  <h2><span class="num">01</span>数据在内存里长什么样</h2>
+
+  <h3>三个基本单位</h3>
+  <table>
+    <tr><th>单位</th><th>含义</th><th>换算</th></tr>
+    <tr><td>位 bit</td><td>一个 0 或 1，最小单位</td><td>—</td></tr>
+    <tr><td>字节 Byte</td><td>内存的编址单位，每个字节有独立地址</td><td class="n">1 B = 8 bit</td></tr>
+    <tr><td>字 Word</td><td>CPU 一次能处理的数据长度（一般 4 或 8 字节）</td><td>与机器有关</td></tr>
+  </table>
+  <p>容量换算（注意是 1024，不是 1000）：</p>
+  <pre><code>1 KB = 1024 B      1 MB = 1024 KB      1 GB = 1024 MB      1 TB = 1024 GB</code></pre>
+
+  <h3>二进制怎么换算（必须会手算）</h3>
+  <p>二进制每一位的权重是 2 的幂：<code>8 4 2 1</code>（从右往左）。</p>
+  <pre><code>  1 0 1 1   =  8 + 0 + 2 + 1 = 11(十进制)
+  1 1 0 1 0 = 16 + 8 + 0 + 2 + 0 = 26(十进制)
+  十进制 13 -> 13=8+4+1 -> 1 1 0 1
+  十进制 20 -> 20=16+4 -> 1 0 1 0 0</code></pre>
+  <p>常用的十六进制只是二进制的「缩写」：4 位二进制 = 1 位十六进制。</p>
+  <pre><code>二进制 1011 0101  ->  十六进制 B5   (1011=B, 0101=5)</code></pre>
+
+  <h3>负数怎么存：原码、反码、补码</h3>
+  <p>最高位当「符号位」：0 表示正，1 表示负。C 语言里负数一律用 <b>补码</b> 存放。</p>
+  <table>
+    <tr><th>表示法</th><th>规则</th><th>以 -5 为例（8 位）</th></tr>
+    <tr><td>原码</td><td>符号位 + 绝对值</td><td class="n">1000 0101</td></tr>
+    <tr><td>反码</td><td>负数：符号位不变，其余取反</td><td class="n">1111 1010</td></tr>
+    <tr><td>补码</td><td>负数：反码 + 1</td><td class="n">1111 1011</td></tr>
+  </table>
+  <div class="tip"><b>为什么非要用补码</b>因为补码能让「减法」直接用「加法」电路来算，硬件更简单。这也是为什么 <code>1 + (-1) = 0</code> 在补码下自动成立。</div>
+  <div class="warn"><b>从这里推出一个后果</b>补码把 0 的两种表示（正零负零）省出来了，所以 8 位补码能表示 <b>-128 ~ 127</b>（负数比正数多一个）。这个「多一个」的规律，到后面学溢出时会反复出现。</div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>数据类型全景图</h2>
+  <pre><code>C 的数据类型
+├── 基本类型
+│   ├── 整型      int / short / long / long long
+│   ├── 浮点型    float / double / long double
+│   ├── 字符型    char
+│   └── 布尔型    _Bool (C99)
+├── 构造类型
+│   ├── 数组
+│   ├── 结构体 struct
+│   ├── 共用体 union
+│   └── 枚举 enum
+├── 指针类型
+└── 空类型 void</code></pre>
+  <p>第 2 章你只需要拿下前三个：<b>整型、浮点型、字符型</b>。</p>
+</section>
+
+<section>
+  <h2><span class="num">03</span>整型数据</h2>
+
+  <h3>整型常量怎么写</h3>
+  <table>
+    <tr><th>进制</th><th>写法</th><th>例子</th><th>十进制值</th></tr>
+    <tr><td>十进制</td><td>直接写</td><td class="n">123</td><td class="n">123</td></tr>
+    <tr><td>八进制</td><td>以 <code>0</code> 开头</td><td class="n">0123</td><td class="n">83</td></tr>
+    <tr><td>十六进制</td><td>以 <code>0x</code> 或 <code>0X</code> 开头</td><td class="n">0x1A</td><td class="n">26</td></tr>
+  </table>
+  <p>八进制 0123 为什么是 83？<code>1×64 + 2×8 + 3×1 = 83</code>。十六进制 0x1A：<code>1×16 + 10 = 26</code>（A=10, B=11, C=12, D=13, E=14, F=15）。</p>
+  <div class="warn"><b>经典陷阱</b><code>int a = 010;</code> 这个 a 是 <b>8</b>，不是 10。开头那个 0 不是给人看的，是给编译器看的。</div>
+
+  <h3>整型变量：类型、字节数、取值范围</h3>
+  <table>
+    <tr><th>类型</th><th>字节</th><th>取值范围（有符号）</th></tr>
+    <tr><td class="n">short</td><td>2</td><td class="n">-32768 ~ 32767</td></tr>
+    <tr><td class="n">int</td><td>4</td><td class="n">-2147483648 ~ 2147483647</td></tr>
+    <tr><td class="n">long</td><td>4 (Windows) / 8 (Linux)</td><td>见下注</td></tr>
+    <tr><td class="n">long long</td><td>8</td><td class="n">约 ±9.2×10^18</td></tr>
+    <tr><td class="n">unsigned int</td><td>4</td><td class="n">0 ~ 4294967295</td></tr>
+  </table>
+  <div class="warn"><b>跨平台大坑（记住这条）</b><code>long</code> 在 Windows 上是 <b>4 字节</b>，在 64 位 Linux/macOS 上是 <b>8 字节</b>。所以「要存 64 位整数」时别用 long，一律用 <code>long long</code>，才可移植。<br>你上课用的是 Windows + Visual Studio / Dev-C++，所以：short=2、int=4、long=4、long long=8。</div>
+
+  <h3>sizeof：别猜，让程序告诉你</h3>
+  <p><code>sizeof</code> 是运算符（不是函数），返回某个类型/变量占多少字节。</p>
+  <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    printf("char        : %d 字节\n", (int)sizeof(char));
+    printf("short       : %d 字节\n", (int)sizeof(short));
+    printf("int         : %d 字节\n", (int)sizeof(int));
+    printf("long        : %d 字节\n", (int)sizeof(long));
+    printf("long long   : %d 字节\n", (int)sizeof(long long));
+    printf("float       : %d 字节\n", (int)sizeof(float));
+    printf("double      : %d 字节\n", (int)sizeof(double));
+
+    int a = 100;
+    printf("sizeof(a)   : %d 字节\n", (int)sizeof(a));
+    return 0;
+}</code></pre>
+  <p>这段代码你今晚亲手跑一遍，把结果抄在笔记本上。这是你 C 语言生涯里第一份「机器给出的答案」。</p>
+
+  <h3>溢出：整数装不下会怎样</h3>
+  <pre><code>int a = 2147483647;   /* int 的最大值 */
+a = a + 1;
+printf("%d\n", a);    /* 输出 -2147483648 */
+
+short b = 32767;
+b = b + 1;
+printf("%d\n", b);    /* 输出 -32768 */</code></pre>
+  <p>不是报错，也不是变成 2147483648，而是「绕回去」了——这就是补码的必然结果。最大值加 1 变成最小值，像时钟走过 12 点回到 1 点。</p>
+</section>
+
+<section>
+  <h2><span class="num">04</span>实型数据（浮点型）</h2>
+
+  <h3>实型常量两种写法</h3>
+  <pre><code>3.14        /* 小数形式 */
+.5          /* 等于 0.5 */
+5.          /* 等于 5.0 */
+3.14e5      /* 指数形式：3.14 × 10^5 = 314000.0 */
+1.5e-3      /* 1.5 × 10^-3 = 0.0015 */</code></pre>
+  <div class="warn"><b>指数形式的硬性规则</b>① <code>e</code> 前面必须有数字（<code>e5</code> 是错的，要写 <code>1e5</code>）；② <code>e</code> 后面必须是整数（<code>1.2e1.5</code> 是错的）；③ <code>e</code> 前后不能有空格。</div>
+  <p>规范化指数形式：小数点前只有一位非零数字。<code>314000.0</code> 的规范写法是 <code>3.14e5</code>。</p>
+
+  <h3>float 与 double 的精度</h3>
+  <table>
+    <tr><th>类型</th><th>字节</th><th>有效数字</th><th>说明</th></tr>
+    <tr><td class="n">float</td><td>4</td><td>约 6~7 位</td><td>单精度</td></tr>
+    <tr><td class="n">double</td><td>8</td><td>约 15~16 位</td><td>双精度，默认首选</td></tr>
+    <tr><td class="n">long double</td><td>8 或 16</td><td>更长</td><td>用得少</td></tr>
+  </table>
+  <p>存储方式遵循 <b>IEEE 754</b> 标准：符号位 + 指数位 + 尾数位。float 是 1+8+23，double 是 1+11+52。尾数位越多，能记的有效数字越多。</p>
+
+  <h3>为什么 0.1 + 0.2 != 0.3</h3>
+  <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    float a = 0.1f, b = 0.2f;
+    if (a + b == 0.3f)
+        printf("相等\n");
+    else
+        printf("不相等！(a+b = %.10f)\n", a + b);
+    return 0;
+}</code></pre>
+  <p>0.1 在二进制里是无限循环小数，存进 float 只能存一个近似值，两个近似值相加误差就露出来了。<b>结论：浮点数永远不要用 == 比较大小</b>，要比较就用差值判断：</p>
+  <pre><code>if (fabs(a + b - 0.3) &lt; 1e-6)   /* 需要 #include &lt;math.h&gt; */
+    printf("可以认为相等\n");</code></pre>
+</section>
+
+<section>
+  <h2><span class="num">05</span>字符型数据</h2>
+
+  <h3>字符常量和转义字符</h3>
+  <p>字符常量用<b>单引号</b>括起来：<code>'a'</code>、<code>'A'</code>、<code>'0'</code>、<code>' '</code>。注意 <code>'\0'</code> 和 <code>'0'</code> 是两回事。</p>
+  <table>
+    <tr><th>转义字符</th><th>含义</th></tr>
+    <tr><td class="n">\n</td><td>换行</td></tr>
+    <tr><td class="n">\t</td><td>制表符（Tab）</td></tr>
+    <tr><td class="n">\\</td><td>反斜杠本身</td></tr>
+    <tr><td class="n">\'</td><td>单引号</td></tr>
+    <tr><td class="n">\"</td><td>双引号</td></tr>
+    <tr><td class="n">\0</td><td>空字符（ASCII 码 0），字符串结束标志</td></tr>
+    <tr><td class="n">\ddd</td><td>1~3 位八进制数表示的字符，如 \101 是 'A'</td></tr>
+    <tr><td class="n">\xhh</td><td>十六进制数表示的字符，如 \x41 是 'A'</td></tr>
+  </table>
+
+  <h3>关键认知：字符本质就是整数</h3>
+  <p>计算机里没有「字母」这种东西，只有 ASCII 码。<code>char</code> 占 1 字节，存的其实是那个数字。</p>
+  <table>
+    <tr><th>字符</th><th>ASCII</th><th>记忆点</th></tr>
+    <tr><td class="n">'0' ~ '9'</td><td class="n">48 ~ 57</td><td>连续</td></tr>
+    <tr><td class="n">'A' ~ 'Z'</td><td class="n">65 ~ 90</td><td>连续</td></tr>
+    <tr><td class="n">'a' ~ 'z'</td><td class="n">97 ~ 122</td><td>连续</td></tr>
+    <tr><td class="n">' '</td><td class="n">32</td><td>空格</td></tr>
+    <tr><td class="n">'\n'</td><td class="n">10</td><td>换行</td></tr>
+  </table>
+  <div class="tip"><b>最值钱的三个数</b><code>'0'=48</code>、<code>'A'=65</code>、<code>'a'=97</code>。而且 <code>'a' - 'A' = 32</code>，所以大小写转换就是加减 32。</div>
+
+  <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    char c = 'A';
+    printf("%c 的 ASCII 码是 %d\n", c, c);   /* A 的 ASCII 码是 65 */
+
+    c = c + 1;                                /* 字符可以参与算术运算 */
+    printf("加 1 后变成 %c\n", c);             /* B */
+
+    char small = 'a';
+    small = small - 32;                       /* 小写转大写 */
+    printf("小写 a 转大写：%c\n", small);       /* A */
+
+    printf("'0' 的值是 %d，不是 0 本身\n", '0'); /* 48 */
+    return 0;
+}</code></pre>
+  <div class="warn"><b>务必区分</b><code>'0'</code> 是字符，值是 48；<code>0</code> 是整数零。写成 <code>int x = '0';</code> 的 x 是 48，不是 0。这是新手第一大混淆点。</div>
+</section>
+
+<section>
+  <h2><span class="num">06</span>算术运算符与表达式</h2>
+
+  <h3>五个运算符</h3>
+  <table>
+    <tr><th>运算符</th><th>含义</th><th>注意</th></tr>
+    <tr><td class="n">+ - *</td><td>加 减 乘</td><td>无坑</td></tr>
+    <tr><td class="n">/</td><td>除</td><td>两个整数相除，结果<b>截断取整</b></td></tr>
+    <tr><td class="n">%</td><td>求余</td><td>只能用于<b>整数</b>，结果符号跟着被除数</td></tr>
+  </table>
+  <pre><code>5 / 2        /* = 2  不是 2.5，小数部分直接丢掉 */
+5.0 / 2      /* = 2.5  有一个是浮点，就按浮点算 */
+5 % 2        /* = 1 */
+-5 % 3       /* = -2  符号跟被除数 -5 走 */
+5 % -3       /* = 2 */
+5.5 % 2      /* 编译错误！% 不能用在小数上 */</code></pre>
+  <div class="warn"><b>最容易错的写法</b>想算平均值：<code>int avg = (a + b) / 2;</code> 如果 a+b 是奇数，结果会被截断。要精确就得写 <code>(a + b) / 2.0</code>，或者提前把变量换成 double。</div>
+
+  <h3>自增自减：前缀与后缀</h3>
+  <pre><code>int i = 5;
+int a = i++;   /* 后缀：先把 5 给 a，i 自己再变 6  →  a=5, i=6 */
+int j = 5;
+int b = ++j;   /* 前缀：j 先变 6，再把 6 给 b       →  b=6, j=6 */</code></pre>
+  <p>口诀：<b>++ 在前，先加后用；++ 在后，先用后加。</b></p>
+
+  <h3>类型转换</h3>
+  <p><b>自动转换</b>（小范围 → 大范围，安全）：</p>
+  <pre><code>char / short  ->  int  ->  unsigned  ->  long  ->  double
+                                      (浮点级别最高)
+
+1 + 2.5   /* int 自动升级为 double，结果是 3.5 */</code></pre>
+  <p><b>强制转换</b>（你说了算，可能丢数据）：</p>
+  <pre><code>(int)3.9      /* = 3，直接砍掉小数，不是四舍五入 */
+(int)(5.0/2)  /* = 2 */
+(double)5/2   /* = 2.5，注意括号位置，只转了 5 */</code></pre>
+  <div class="tip"><b>观察这组的区别</b><code>(double)5 / 2</code> 得 2.5，因为 5 先变成 5.0；<code>(double)(5 / 2)</code> 得 2.0，因为里面已经先算出整数 2 了。括号的位置决定一切。</div>
+</section>
+
+<section>
+  <h2><span class="num">07</span>今晚练习（先做，再看答案）</h2>
+  <p>规则：<b>先自己写在纸上算，不许直接看答案</b>。做错的题在旁边打个记号，明天再回头看一遍。</p>
+
+  <div class="q"><span class="idx">1</span>写出下列各式的结果：</div>
+  <pre><code>(1) 7 / 2          (2) 7 % 2         (3) 7.0 / 2
+(4) (float)7 / 2   (5) (float)(7 / 2) (6) -7 % 2</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p>(1) <code>3</code>　整数除法截断，小数位丢掉。<br>
+       (2) <code>1</code>　7 = 2×3 + 1。<br>
+       (3) <code>3.5</code>　7.0 是 double，按浮点运算。<br>
+       (4) <code>3.5</code>　7 先转成 float 再除。<br>
+       (5) <code>3.0</code>　括号里已经先算出整数 3，再转成 float，所以是 3.0。<br>
+       (6) <code>-1</code>　C99 起余数符号跟随被除数，-7 = 2×(-4) + 1？不对，重算：-7 / 2 = -3（截断），-3×2 = -6，-7 - (-6) = -1，所以结果是 -1。</p>
+  </div></details>
+
+  <div class="q"><span class="idx">2</span>下面三个变量的值分别是多少？</div>
+  <pre><code>int a = 010;
+int b = 0x10;
+int c = 10;</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p><code>a = 8</code>（八进制 010 = 1×8 + 0 = 8）<br>
+       <code>b = 16</code>（十六进制 0x10 = 1×16 + 0 = 16）<br>
+       <code>c = 10</code>（普通十进制）</p>
+  </div></details>
+
+  <div class="q"><span class="idx">3</span>这段代码输出什么？</div>
+  <pre><code>short s = 32767;
+s = s + 1;
+printf("%d\n", s);</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p><code>-32768</code>。short 上限 32767，加 1 越界后按补码绕回到最小值，不报错。这就是整数溢出。</p>
+  </div></details>
+
+  <div class="q"><span class="idx">4</span>下面 printf 各输出什么？</div>
+  <pre><code>char c = 'a';
+printf("%c\n", c);
+printf("%d\n", c);
+printf("%c\n", c - 32);
+printf("%d\n", '0');</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p>依次是：<code>a</code>、<code>97</code>、<code>A</code>、<code>48</code>。<br>
+       第 3 行：'a' 是 97，减 32 得 65，%c 输出 65 对应的字符就是 'A'。<br>
+       第 4 行：'0' 这个字符的 ASCII 码是 48，不是数字 0。</p>
+  </div></details>
+
+  <div class="q"><span class="idx">5</span>下面这段代码会输出"相等"吗？为什么？</div>
+  <pre><code>float x = 0.1f;
+if (x == 0.1) printf("相等\n"); else printf("不相等\n");</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p><code>不相等</code>。<code>0.1f</code> 是 float（4 字节），而 <code>0.1</code> 是 double（8 字节），两者精度不同，二进制表示也不同，比较时不等。就算两个都是 float，0.1 本身也存不准。结论：浮点数不要用 == 比较。</p>
+  </div></details>
+
+  <div class="q"><span class="idx">6</span>求 i、j、a、b 的最终值：</div>
+  <pre><code>int i = 3, j = 3;
+int a = i++;
+int b = ++j;</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p><code>a = 3</code>（后缀：先赋值，i 再变 4 → <code>i = 4</code>）<br>
+       <code>b = 4</code>（前缀：j 先变 4，再赋值 → <code>j = 4</code>）</p>
+  </div></details>
+
+  <div class="q"><span class="idx">7</span>下列哪些写法是错的？为什么？</div>
+  <pre><code>(1) 3.2e5     (2) e5     (3) 1.2e3.5     (4) .5e-3</code></pre>
+  <details><summary>看答案</summary><div class="ans">
+    <p>(1) 合法，等于 320000.0　(2) 错，e 前面必须有数字<br>
+       (3) 错，e 后面必须是整数，不能是 3.5　(4) 合法，等于 0.0005，.5 等同于 0.5</p>
+  </div></details>
+
+  <div class="q"><span class="idx">8</span>手算并写程序验证：输出你机器上 char、int、long、long long、float、double 的字节数。</div>
+  <details><summary>看答案</summary><div class="ans">
+    <p>用本节 03 里的 sizeof 程序跑一遍。Windows 64 位下预期：<br>
+       char 1、short 2、int 4、long 4、long long 8、float 4、double 8。<br>
+       如果你的 <code>long</code> 输出不是 4，说明你用的是 Linux/WSL 环境，那就是 8。</p>
+  </div></details>
+
+  <div class="q"><span class="idx">9</span>为什么要用补码存负数？用自己的话说一遍。</div>
+  <details><summary>看答案</summary><div class="ans">
+    <p>因为补码能把减法变成加法，CPU 不需要单独做一套减法电路，硬件更简单；同时补码让 0 只有一种表示，能多表示一个负数（-128）。</p>
+  </div></details>
+
+  <div class="q"><span class="idx">10</span>（动手题）输入一个三位整数，输出它的百位、十位、个位数字。提示：用 / 和 %。</div>
+  <details><summary>看答案</summary><div class="ans">
+    <pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int n;
+    printf("请输入一个三位整数: ");
+    scanf("%d", &amp;n);
+
+    printf("百位: %d\n", n / 100);
+    printf("十位: %d\n", n / 10 % 10);
+    printf("个位: %d\n", n % 10);
+    return 0;
+}</code></pre>
+    <p>这题是「整数除法 + 求余」的经典组合，以后写题目会反复用到，值得现在就记熟。</p>
+  </div></details>
+</section>
+
+<section>
+  <h2><span class="num">08</span>学完自检</h2>
+  <p>今晚结束前，不用看书，能对下面每一条答"是"，就算过关：</p>
+  <ul class="chk">
+    <li>我能说清 位、字节 的关系，能默写 1KB = ? B</li>
+    <li>我能手算二进制 ↔ 十进制，也认识十六进制</li>
+    <li>我知道 -5 的补码怎么算，知道为什么用补码</li>
+    <li>我知道 <code>010</code> 和 <code>10</code> 不一样</li>
+    <li>我知道我机器上 int 是几字节、double 是几字节</li>
+    <li>我知道 <code>5/2</code> 等于几，也知道 <code>5.0/2</code> 等于几</li>
+    <li>我知道 <code>%d</code> 和 <code>%c</code> 输出 <code>'0'</code> 分别是多少</li>
+    <li>我知道为什么浮点数不能用 == 比较</li>
+    <li>我能分清 <code>i++</code> 和 <code>++i</code></li>
+  </ul>
+  <div class="tip"><b>有任意一条答不出</b>别急着往下看第 3 章，回头把这节的对应段落重读一遍。第 2 章的坑，第 3 章会全部还给你。</div>
+</section>
+
+<footer>李佳轩 · C 语言学习讲义 · 第 2 章 · 2026-09-11 生成</footer>
+</div>
+</body>
+</html>
